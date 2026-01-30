@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Contable PRO | DMR PRODUCCIONS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a; --secondary: #1e293b; --accent: #3b82f6;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+            --bg: #f8fafc; --white: #ffffff; --gold: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg); color: var(--secondary); overflow-x: hidden; }
+
+        /* --- LOGIN / REGISTRO --- */
+        #login-page { position: fixed; inset: 0; background: radial-gradient(circle at top right, #1e293b, #0f172a); display: flex; justify-content: center; align-items: center; z-index: 5000; }
+        .login-card { background: white; padding: 3rem; border-radius: 30px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        .login-card h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .login-card h1 span { color: var(--accent); }
+        .login-card input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 1rem; outline: none; transition: 0.3s; }
+        .login-card input:focus { border-color: var(--accent); ring: 2px solid var(--accent); }
+
+        /* --- NAVEGACIÓN --- */
+        #main-app { display: none; }
+        header { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); color: white; padding: 0.8rem 0; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .nav-container { max-width: 1400px; margin: auto; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; }
+        .logo { font-size: 1.4rem; font-weight: 800; cursor: pointer; color: white; text-decoration: none; }
+        .logo span { color: var(--accent); }
+        nav ul { display: flex; list-style: none; gap: 8px; }
+        nav a { color: #94a3b8; text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .nav-active { color: white !important; background: var(--accent) !important; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+
+        /* --- CONTENEDORES --- */
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 25px; }
+        .section { display: none; animation: slideUp 0.4s ease-out; }
+        .active-section { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--white); border-radius: 24px; padding: 2.5rem; border: 1px solid #e2e8f0; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .grid-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .info-box { background: #f1f5f9; padding: 20px; border-radius: 15px; border-left: 4px solid var(--accent); transition: 0.3s; }
+        .info-box:hover { transform: translateY(-5px); background: #eef2f7; }
+
+        /* --- TABLA XML --- */
+        .table-container { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+        th { background: #f8fafc; padding: 16px; color: #64748b; font-weight: 700; border-bottom: 2px solid #edf2f7; text-transform: uppercase; font-size: 0.75rem; }
+        td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
+        .badge { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; }
+        .badge-iva { background: #dcfce7; color: #15803d; }
+        .badge-ieps { background: #f3e8ff; color: #7e22ce; }
+        .badge-status { font-weight: bold; padding: 5px 10px; border-radius: 5px; }
+
+        /* --- BOTONES Y MODAL --- */
+        .btn { padding: 12px 24px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-gold { background: var(--gold); color: var(--primary); }
+        .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 6000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; padding: 40px; border-radius: 30px; width: 100%; max-width: 450px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div id="login-page">
+    <div class="login-card" id="card-login">
+        <h1>DJ <span>PRO</span></h1>
+        <p style="color:#64748b; margin-bottom: 25px;">Software Contable de DMR Produccions</p>
+        <input type="email" id="email" placeholder="Correo Electrónico">
+        <input type="password" id="pass" placeholder="Contraseña">
+        <button class="btn btn-primary" style="width: 100%;" id="btnLogin">Iniciar Sesión</button>
+        <p style="margin-top: 20px; font-size: 0.9rem;">¿Sin cuenta? <a onclick="toggleAuth(true)" style="color:var(--accent); cursor:pointer; font-weight:bold;">Regístrate</a></p>
+    </div>
+    <div class="login-card" id="card-register" style="display:none;">
+        <h1>Unirse a DMR</h1>
+        <p style="margin-bottom: 25px;">Crea tu cuenta gratuita hoy</p>
+        <input type="email" id="reg-email" placeholder="Correo Electrónico">
+        <input type="password" id="reg-pass" placeholder="Contraseña">
+        <button class="btn btn-gold" style="width: 100%;" id="btnRegister">Registrarme</button>
+        <p style="margin-top: 20px;"><a onclick="toggleAuth(false)" style="color:var(--accent); cursor:pointer;">Volver</a></p>
+    </div>
+</div>
+
+<div id="main-app">
+    <header>
+        <div class="nav-container">
+            <a class="logo" onclick="showSection('inicio')">DJ <span>PRO</span></a>
+            <nav>
+                <ul>
+                    <li><a onclick="showSection('inicio')" id="m-inicio" class="nav-active">Escritorio</a></li>
+                    <li><a onclick="showSection('reportes')" id="m-reportes">Analizador</a></li>
+                    <li><a onclick="showSection('servicios')" id="m-servicios">Planes</a></li>
+                    <li><a onclick="showSection('contacto')" id="m-contacto">Soporte</a></li>
+                    <li><a id="nav-admin" style="display:none; color:var(--gold); font-weight:800;" onclick="showSection('admin-panel')">ADMIN ⚙️</a></li>
+                    <li><a onclick="handleLogout()" style="color:var(--danger)">Cerrar</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="inicio" class="section active-section">
+            <div class="card">
+                <h1>Hola, <span id="user-display" style="color:var(--accent)">Usuario</span></h1>
+                <p style="color:#64748b;">Panel de control centralizado de DMR Produccions.</p>
+                
+                <div class="grid-info">
+                    <div class="info-box">
+                        <h4>📊 Actividad Total</h4>
+                        <p style="font-size:0.85rem; margin-top:8px;">Has procesado <strong><span id="xml-count">0</span> XML</strong> en total.</p>
+                    </div>
+                    <div class="info-box" style="border-left-color: var(--warning);">
+                        <h4>📅 Estatus de Cuenta</h4>
+                        <p style="font-size:0.85rem; margin-top:8px;">Plan: <strong id="plan-status">Básico (Gratis)</strong>.</p>
+                    </div>
+                    <div class="info-box" style="border-left-color: var(--success);">
+                        <h4>💡 Tip Fiscal</h4>
+                        <p style="font-size:0.85rem; margin-top:8px;">Recuerda verificar que el estatus de los CFDI sea 'Vigente'.</p>
+                    </div>
+                    <div class="info-box" style="border-left-color: #7e22ce;">
+                        <h4>🛠️ Herramientas</h4>
+                        <p style="font-size:0.85rem; margin-top:8px;">Utiliza el <strong>Analizador Masivo</strong>.</p>
+                    </div>
+                </div>
+
+                <div id="panel-premium" style="display:none; margin-top:30px; background:var(--primary); color:white; padding:30px; border-radius:24px; border-bottom: 5px solid var(--gold);">
+                    <h3 style="color:var(--gold); margin-bottom:20px;">Tablero de Auditoría Premium 💎</h3>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:20px;">
+                        <div><small style="opacity:0.7">IVA Trasladado</small><h2 id="sum-iva" style="color:var(--success)">$0.00</h2></div>
+                        <div><small style="opacity:0.7">IEPS Total</small><h2 id="sum-ieps" style="color:var(--gold)">$0.00</h2></div>
+                        <div><small style="opacity:0.7">Monto Bruto</small><h2 id="sum-total">$0.00</h2></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="reportes" class="section">
+            <div class="card">
+                <h2>Analizador Masivo de XML</h2>
+                <div style="border: 2px dashed #cbd5e1; padding: 30px; text-align: center; border-radius: 20px; background: #f8fafc; margin-bottom: 25px;">
+                    <input type="file" id="fileInput" multiple accept=".xml">
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>RFC Emisor</th><th>Descripción</th><th>Base</th><th>IVA</th><th>IEPS</th><th>Total</th></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="servicios" class="section">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                <div class="card">
+                    <h3>Versión Básica</h3>
+                    <p style="font-size: 1.5rem; font-weight: 800; margin: 15px 0;">Gratis</p>
+                    <ul style="list-style: none; color: #64748b; line-height: 2;">
+                        <li>✓ Lectura de CFDI 4.0</li>
+                        <li>✓ Exportación a CSV</li>
+                        <li>❌ Sin sumatorias automáticas</li>
+                    </ul>
+                    <button class="btn" id="btnPlanActual" disabled style="width: 100%; margin-top: 20px;">Plan Actual</button>
+                </div>
+                <div class="card" style="border: 2px solid var(--gold); background: var(--primary); color: white;">
+                    <h3 style="color: var(--gold);">Contador Premium</h3>
+                    <p style="font-size: 1.5rem; font-weight: 800; margin: 15px 0;">$250 MXN</p>
+                    <ul style="list-style: none; line-height: 2;">
+                        <li>✓ Sumatorias de IVA e IEPS</li>
+                        <li>✓ Auditoría Masiva Express</li>
+                        <li>✓ Soporte VIP DMR WhatsApp</li>
+                    </ul>
+                    <button class="btn btn-gold" style="width: 100%; margin-top: 20px;" id="btnMejorar" onclick="abrirModal()">Subir a PRO</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacto" class="section">
+            <div class="card">
+                <h2>Asistencia Técnica DMR</h2>
+                <div class="grid-info">
+                    <div class="info-box">
+                        <h4>Atención Directa</h4>
+                        <p style="margin-top:10px;"><strong>WhatsApp:</strong> +52 449 294 1611</p>
+                        <p><strong>Email:</strong> dmrproduccions23@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-panel" class="section">
+            <div class="card">
+                <h2>Gestión de Pagos Pendientes (ADMIN)</h2>
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">Solo aparecen pagos si las Reglas de Firebase están configuradas correctamente.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Usuario</th><th>Comprobante</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody id="admin-solicitudes">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h2>Lista de Clientes DMR (Base de Datos)</h2>
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">Listado total de usuarios.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Email</th><th>Estatus</th><th>XMLs Procesados</th></tr>
+                        </thead>
+                        <tbody id="admin-clientes-lista">
+                             </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div id="modalPago" class="modal">
+    <div class="modal-content">
+        <h2>Mejorar a Plan PRO 💎</h2>
+        <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; text-align: left; font-size: 0.85rem; margin: 20px 0;">
+            <strong>Banco:</strong> Nu México<br>
+            <strong>CLABE:</strong> 012 180 0152 9416 1111<br>
+            <strong>Monto:</strong> $250.00 MXN
+        </div>
+        <input type="file" id="pagoCapture" accept="image/*" style="margin-bottom: 20px; width: 100%;">
+        <button class="btn btn-gold" style="width: 100%;" id="btnEnviarPago">Enviar Comprobante</button>
+        <button class="btn" style="width: 100%; margin-top: 10px;" onclick="cerrarModal()">Cancelar</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCR2krA_XJh3v6kv51_gk6O71nF9b1XT2A",
+      authDomain: "xmll-592f3.firebaseapp.com",
+      projectId: "xmll-592f3",
+      storageBucket: "xmll-592f3.firebasestorage.app",
+      messagingSenderId: "878253866280",
+      appId: "1:878253866280:web:eaa2581bb532a9abeba41d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    let isPremium = false;
+    const ADMIN_EMAIL = "admin@dmr.com"; 
+
+    // --- LOGICA LOGIN ---
+    document.getElementById('btnLogin').onclick = () => {
+        signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert("Error: " + e.message));
+    };
+
+    // --- LOGICA REGISTRO ---
+    document.getElementById('btnRegister').onclick = () => {
+        const e = document.getElementById('reg-email').value;
+        const p = document.getElementById('reg-pass').value;
+        
+        createUserWithEmailAndPassword(auth, e, p).then(async (res) => {
+            // Creamos documento en 'usuarios'
+            try {
+                await setDoc(doc(db, "usuarios", res.user.uid), { 
+                    email: e, 
+                    plan: 'basico', 
+                    xmlTotal: 0,
+                    uid: res.user.uid, // Guardamos el UID para que el Admin lo pueda usar
+                    fechaRegistro: new Date().toISOString()
+                });
+                alert("Cuenta creada correctamente.");
+            } catch (err) {
+                console.error(err);
+                alert("Error base de datos: " + err.message);
+            }
+        }).catch(e => alert("Error registro: " + e.message));
+    };
+
+    // --- MONITOR DE SESIÓN ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('user-display').innerText = user.email;
+
+            // --- ADMIN ---
+            if(user.email === ADMIN_EMAIL) {
+                document.getElementById('nav-admin').style.display = 'block'; 
+                cargarAdmin(); 
+            } else {
+                document.getElementById('nav-admin').style.display = 'none';
+            }
+
+            // --- USUARIO ---
+            onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
+                if(snap.exists()){
+                    const userData = snap.data();
+                    isPremium = userData.plan === 'pro';
+                    document.getElementById('xml-count').innerText = userData.xmlTotal || 0;
+                    document.getElementById('plan-status').innerText = isPremium ? "Premium 💎" : "Básico (Gratis)";
+                    
+                    if(isPremium) {
+                        document.getElementById('panel-premium').style.display = 'block';
+                        document.getElementById('btnMejorar').innerText = "Premium Activo";
+                        document.getElementById('btnMejorar').disabled = true;
+                    } else {
+                        document.getElementById('panel-premium').style.display = 'none';
+                    }
+                }
+            });
+
+        } else {
+            document.getElementById('login-page').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+    });
+
+    // --- SUBIDA DE PAGO ---
+    document.getElementById('btnEnviarPago').addEventListener('click', async () => {
+        const file = document.getElementById('pagoCapture').files[0];
+        if(!file) return alert("Selecciona ticket");
+        
+        const btn = document.getElementById('btnEnviarPago');
+        btn.innerText = "Subiendo..."; btn.disabled = true;
+
+        try {
+            // Subir Imagen
+            const path = `tickets/${auth.currentUser.uid}_${Date.now()}`;
+            const url = await getDownloadURL((await uploadBytes(ref(storage, path), file)).ref);
+
+            // Crear registro en 'pagos'
+            // IMPORTANTE: Las nuevas reglas permiten esto ahora
+            await setDoc(doc(db, "pagos", auth.currentUser.uid), {
+                email: auth.currentUser.email,
+                uid: auth.currentUser.uid,
+                foto: url,
+                status: 'pendiente',
+                fecha: new Date().toISOString()
+            });
+
+            alert("Enviado. Espera aprobación.");
+            cerrarModal();
+        } catch(e) { 
+            console.error(e);
+            alert("Error (Revisa tus reglas de Firebase): " + e.message); 
+        } finally { 
+            btn.innerText = "Enviar Comprobante"; btn.disabled = false; 
+        }
+    });
+
+    // --- PANEL ADMIN ---
+    function cargarAdmin() {
+        // Cargar PAGOS
+        onSnapshot(collection(db, "pagos"), (snap) => {
+            const list = document.getElementById('admin-solicitudes');
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                if(data.status === 'pendiente') {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${data.email}</td>
+                        <td><a href="${data.foto}" target="_blank" style="color:var(--accent); font-weight:bold;">VER TICKET</a></td>
+                        <td><button class="btn btn-gold" onclick="aprobarUsuario('${data.uid}')" style="padding:5px 10px; font-size:0.7rem;">APROBAR</button></td>
+                    `;
+                    list.appendChild(row);
+                }
+            });
+            if(list.innerHTML === "") list.innerHTML = "<tr><td colspan='3'>Sin pagos pendientes</td></tr>";
+        }, (error) => {
+            console.error("Error Admin Pagos:", error);
+            document.getElementById('admin-solicitudes').innerHTML = `<tr><td colspan='3' style='color:red'>Error de permisos: ${error.message}</td></tr>`;
+        });
+
+        // Cargar USUARIOS
+        onSnapshot(collection(db, "usuarios"), (snap) => {
+            const list = document.getElementById('admin-clientes-lista');
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                const isPro = data.plan === 'pro';
+                list.innerHTML += `
+                    <tr>
+                        <td>${data.email}</td>
+                        <td><span class="badge-status" style="background:${isPro?'#fefce8':'#f1f5f9'}; color:${isPro?'#ca8a04':'#64748b'}">${data.plan.toUpperCase()}</span></td>
+                        <td>${data.xmlTotal || 0}</td>
+                    </tr>
+                `;
+            });
+        }, (error) => {
+            console.error("Error Admin Usuarios:", error);
+            document.getElementById('admin-clientes-lista').innerHTML = `<tr><td colspan='3' style='color:red'>Error de permisos: ${error.message}</td></tr>`;
+        });
+    }
+
+    // APROBACIÓN GLOBAL
+    window.aprobarUsuario = async (uid) => {
+        try {
+            await updateDoc(doc(db, "usuarios", uid), { plan: 'pro' });
+            await updateDoc(doc(db, "pagos", uid), { status: 'aprobado' });
+            alert("Usuario aprobado.");
+        } catch (e) { alert("Error: " + e.message); }
+    };
+
+    // --- XML UTILS ---
+    document.getElementById('fileInput').onchange = async (e) => {
+        const files = e.target.files;
+        const b = document.getElementById('tableBody');
+        b.innerHTML = "";
+        let sIva=0, sIeps=0, sTot=0;
+
+        for (let f of files) {
+            const xml = new DOMParser().parseFromString(await f.text(), "text/xml");
+            const rfc = xml.getElementsByTagNameNS("*", "Emisor")[0]?.getAttribute('Rfc') || "N/A";
+            const conc = xml.getElementsByTagNameNS("*", "Concepto");
+
+            Array.from(conc).forEach(c => {
+                let sub = parseFloat(c.getAttribute('Importe')||0), iva=0, ieps=0;
+                Array.from(c.getElementsByTagNameNS("*", "Traslado")).forEach(tr => {
+                    const imp = parseFloat(tr.getAttribute('Importe')||0);
+                    if(tr.getAttribute('Impuesto')==="002") iva=imp;
+                    if(tr.getAttribute('Impuesto')==="003") ieps=imp;
+                });
+                sIva+=iva; sIeps+=ieps; sTot+=(sub+iva+ieps);
+                b.innerHTML += `<tr><td>${rfc}</td><td>${c.getAttribute('Descripcion').slice(0,30)}</td><td>$${sub.toFixed(2)}</td><td><span class="badge badge-iva">$${iva.toFixed(2)}</span></td><td><span class="badge badge-ieps">$${ieps.toFixed(2)}</span></td><td><strong>$${(sub+iva+ieps).toFixed(2)}</strong></td></tr>`;
+            });
+        }
+        if(isPremium) {
+            document.getElementById('sum-iva').innerText="$"+sIva.toFixed(2);
+            document.getElementById('sum-ieps').innerText="$"+sIeps.toFixed(2);
+            document.getElementById('sum-total').innerText="$"+sTot.toFixed(2);
+        }
+        await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { xmlTotal: increment(files.length) });
+    };
+
+    window.showSection = (id) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
+        document.getElementById(id).classList.add('active-section');
+    };
+    window.toggleAuth = (r) => {
+        document.getElementById('card-login').style.display = r ? 'none' : 'block';
+        document.getElementById('card-register').style.display = r ? 'block' : 'none';
+    };
+    window.abrirModal = () => document.getElementById('modalPago').style.display = 'flex';
+    window.cerrarModal = () => document.getElementById('modalPago').style.display = 'none';
+    window.handleLogout = () => signOut(auth);
+</script>
+</body>
+</html>
