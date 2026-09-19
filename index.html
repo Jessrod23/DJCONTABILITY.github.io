@@ -3,461 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DJ Contable PRO | DMR PRODUCCIONS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Lector CFDI Contable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #0f172a; --secondary: #1e293b; --accent: #3b82f6;
-            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-            --bg: #f8fafc; --white: #ffffff; --gold: #f59e0b;
+        body { font-family: 'Inter', sans-serif; }
+        /* Clases personalizadas para el estado de arrastrar archivos */
+        .drag-active { 
+            border-color: #3b82f6 !important; 
+            background-color: #eff6ff !important; 
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg); color: var(--secondary); overflow-x: hidden; }
-
-        /* --- LOGIN / REGISTRO --- */
-        #login-page { position: fixed; inset: 0; background: radial-gradient(circle at top right, #1e293b, #0f172a); display: flex; justify-content: center; align-items: center; z-index: 5000; }
-        .login-card { background: white; padding: 3rem; border-radius: 30px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
-        .login-card h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); }
-        .login-card h1 span { color: var(--accent); }
-        .login-card input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 1rem; outline: none; transition: 0.3s; }
-        .login-card input:focus { border-color: var(--accent); ring: 2px solid var(--accent); }
-
-        /* --- NAVEGACIÓN --- */
-        #main-app { display: none; }
-        header { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); color: white; padding: 0.8rem 0; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-container { max-width: 1400px; margin: auto; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; }
-        .logo { font-size: 1.4rem; font-weight: 800; cursor: pointer; color: white; text-decoration: none; }
-        .logo span { color: var(--accent); }
-        nav ul { display: flex; list-style: none; gap: 8px; }
-        nav a { color: #94a3b8; text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; }
-        .nav-active { color: white !important; background: var(--accent) !important; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-
-        /* --- CONTENEDORES --- */
-        .container { max-width: 1300px; margin: 30px auto; padding: 0 25px; }
-        .section { display: none; animation: slideUp 0.4s ease-out; }
-        .active-section { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card { background: var(--white); border-radius: 24px; padding: 2.5rem; border: 1px solid #e2e8f0; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .grid-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .info-box { background: #f1f5f9; padding: 20px; border-radius: 15px; border-left: 4px solid var(--accent); transition: 0.3s; }
-        .info-box:hover { transform: translateY(-5px); background: #eef2f7; }
-
-        /* --- TABLA XML --- */
-        .table-container { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
-        th { background: #f8fafc; padding: 16px; color: #64748b; font-weight: 700; border-bottom: 2px solid #edf2f7; text-transform: uppercase; font-size: 0.75rem; }
-        td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
-        .badge { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; }
-        .badge-iva { background: #dcfce7; color: #15803d; }
-        .badge-ieps { background: #f3e8ff; color: #7e22ce; }
-        .badge-status { font-weight: bold; padding: 5px 10px; border-radius: 5px; }
-
-        /* --- BOTONES Y MODAL --- */
-        .btn { padding: 12px 24px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-gold { background: var(--gold); color: var(--primary); }
-        .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
-        
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 6000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; padding: 40px; border-radius: 30px; width: 100%; max-width: 450px; text-align: center; }
+        /* Scrollbar personalizado para la tabla */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 text-slate-800">
 
-<div id="login-page">
-    <div class="login-card" id="card-login">
-        <h1>DJ <span>PRO</span></h1>
-        <p style="color:#64748b; margin-bottom: 25px;">Software Contable de DMR Produccions</p>
-        <input type="email" id="email" placeholder="Correo Electrónico">
-        <input type="password" id="pass" placeholder="Contraseña">
-        <button class="btn btn-primary" style="width: 100%;" id="btnLogin">Iniciar Sesión</button>
-        <p style="margin-top: 20px; font-size: 0.9rem;">¿Sin cuenta? <a onclick="toggleAuth(true)" style="color:var(--accent); cursor:pointer; font-weight:bold;">Regístrate</a></p>
-    </div>
-    <div class="login-card" id="card-register" style="display:none;">
-        <h1>Unirse a DMR</h1>
-        <p style="margin-bottom: 25px;">Crea tu cuenta gratuita hoy</p>
-        <input type="email" id="reg-email" placeholder="Correo Electrónico">
-        <input type="password" id="reg-pass" placeholder="Contraseña">
-        <button class="btn btn-gold" style="width: 100%;" id="btnRegister">Registrarme</button>
-        <p style="margin-top: 20px;"><a onclick="toggleAuth(false)" style="color:var(--accent); cursor:pointer;">Volver</a></p>
-    </div>
-</div>
-
-<div id="main-app">
-    <header>
-        <div class="nav-container">
-            <a class="logo" onclick="showSection('inicio')">DJ <span>PRO</span></a>
-            <nav>
-                <ul>
-                    <li><a onclick="showSection('inicio')" id="m-inicio" class="nav-active">Escritorio</a></li>
-                    <li><a onclick="showSection('reportes')" id="m-reportes">Analizador</a></li>
-                    <li><a onclick="showSection('servicios')" id="m-servicios">Planes</a></li>
-                    <li><a onclick="showSection('contacto')" id="m-contacto">Soporte</a></li>
-                    <li><a id="nav-admin" style="display:none; color:var(--gold); font-weight:800;" onclick="showSection('admin-panel')">ADMIN ⚙️</a></li>
-                    <li><a onclick="handleLogout()" style="color:var(--danger)">Cerrar</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <div class="container">
-        <section id="inicio" class="section active-section">
-            <div class="card">
-                <h1>Hola, <span id="user-display" style="color:var(--accent)">Usuario</span></h1>
-                <p style="color:#64748b;">Panel de control centralizado de DMR Produccions.</p>
-                
-                <div class="grid-info">
-                    <div class="info-box">
-                        <h4>📊 Actividad Total</h4>
-                        <p style="font-size:0.85rem; margin-top:8px;">Has procesado <strong><span id="xml-count">0</span> XML</strong> en total.</p>
-                    </div>
-                    <div class="info-box" style="border-left-color: var(--warning);">
-                        <h4>📅 Estatus de Cuenta</h4>
-                        <p style="font-size:0.85rem; margin-top:8px;">Plan: <strong id="plan-status">Básico (Gratis)</strong>.</p>
-                    </div>
-                    <div class="info-box" style="border-left-color: var(--success);">
-                        <h4>💡 Tip Fiscal</h4>
-                        <p style="font-size:0.85rem; margin-top:8px;">Recuerda verificar que el estatus de los CFDI sea 'Vigente'.</p>
-                    </div>
-                    <div class="info-box" style="border-left-color: #7e22ce;">
-                        <h4>🛠️ Herramientas</h4>
-                        <p style="font-size:0.85rem; margin-top:8px;">Utiliza el <strong>Analizador Masivo</strong>.</p>
-                    </div>
-                </div>
-
-                <div id="panel-premium" style="display:none; margin-top:30px; background:var(--primary); color:white; padding:30px; border-radius:24px; border-bottom: 5px solid var(--gold);">
-                    <h3 style="color:var(--gold); margin-bottom:20px;">Tablero de Auditoría Premium 💎</h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:20px;">
-                        <div><small style="opacity:0.7">IVA Trasladado</small><h2 id="sum-iva" style="color:var(--success)">$0.00</h2></div>
-                        <div><small style="opacity:0.7">IEPS Total</small><h2 id="sum-ieps" style="color:var(--gold)">$0.00</h2></div>
-                        <div><small style="opacity:0.7">Monto Bruto</small><h2 id="sum-total">$0.00</h2></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="reportes" class="section">
-            <div class="card">
-                <h2>Analizador Masivo de XML</h2>
-                <div style="border: 2px dashed #cbd5e1; padding: 30px; text-align: center; border-radius: 20px; background: #f8fafc; margin-bottom: 25px;">
-                    <input type="file" id="fileInput" multiple accept=".xml">
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr><th>RFC Emisor</th><th>Descripción</th><th>Base</th><th>IVA</th><th>IEPS</th><th>Total</th></tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="servicios" class="section">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-                <div class="card">
-                    <h3>Versión Básica</h3>
-                    <p style="font-size: 1.5rem; font-weight: 800; margin: 15px 0;">Gratis</p>
-                    <ul style="list-style: none; color: #64748b; line-height: 2;">
-                        <li>✓ Lectura de CFDI 4.0</li>
-                        <li>✓ Exportación a CSV</li>
-                        <li>❌ Sin sumatorias automáticas</li>
-                    </ul>
-                    <button class="btn" id="btnPlanActual" disabled style="width: 100%; margin-top: 20px;">Plan Actual</button>
-                </div>
-                <div class="card" style="border: 2px solid var(--gold); background: var(--primary); color: white;">
-                    <h3 style="color: var(--gold);">Contador Premium</h3>
-                    <p style="font-size: 1.5rem; font-weight: 800; margin: 15px 0;">$250 MXN</p>
-                    <ul style="list-style: none; line-height: 2;">
-                        <li>✓ Sumatorias de IVA e IEPS</li>
-                        <li>✓ Auditoría Masiva Express</li>
-                        <li>✓ Soporte VIP DMR WhatsApp</li>
-                    </ul>
-                    <button class="btn btn-gold" style="width: 100%; margin-top: 20px;" id="btnMejorar" onclick="abrirModal()">Subir a PRO</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="contacto" class="section">
-            <div class="card">
-                <h2>Asistencia Técnica DMR</h2>
-                <div class="grid-info">
-                    <div class="info-box">
-                        <h4>Atención Directa</h4>
-                        <p style="margin-top:10px;"><strong>WhatsApp:</strong> +52 449 294 1611</p>
-                        <p><strong>Email:</strong> dmrproduccions23@gmail.com</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="admin-panel" class="section">
-            <div class="card">
-                <h2>Gestión de Pagos Pendientes (ADMIN)</h2>
-                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">Solo aparecen pagos si las Reglas de Firebase están configuradas correctamente.</p>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr><th>Usuario</th><th>Comprobante</th><th>Acción</th></tr>
-                        </thead>
-                        <tbody id="admin-solicitudes">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card" style="margin-top: 20px;">
-                <h2>Lista de Clientes DMR (Base de Datos)</h2>
-                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">Listado total de usuarios.</p>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr><th>Email</th><th>Estatus</th><th>XMLs Procesados</th></tr>
-                        </thead>
-                        <tbody id="admin-clientes-lista">
-                             </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </div>
-</div>
-
-<div id="modalPago" class="modal">
-    <div class="modal-content">
-        <h2>Mejorar a Plan PRO 💎</h2>
-        <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; text-align: left; font-size: 0.85rem; margin: 20px 0;">
-            <strong>Banco:</strong> Nu México<br>
-            <strong>CLABE:</strong> 012 180 0152 9416 1111<br>
-            <strong>Monto:</strong> $250.00 MXN
-        </div>
-        <input type="file" id="pagoCapture" accept="image/*" style="margin-bottom: 20px; width: 100%;">
-        <button class="btn btn-gold" style="width: 100%;" id="btnEnviarPago">Enviar Comprobante</button>
-        <button class="btn" style="width: 100%; margin-top: 10px;" onclick="cerrarModal()">Cancelar</button>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCR2krA_XJh3v6kv51_gk6O71nF9b1XT2A",
-      authDomain: "xmll-592f3.firebaseapp.com",
-      projectId: "xmll-592f3",
-      storageBucket: "xmll-592f3.firebasestorage.app",
-      messagingSenderId: "878253866280",
-      appId: "1:878253866280:web:eaa2581bb532a9abeba41d"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    let isPremium = false;
-    const ADMIN_EMAIL = "admin@dmr.com"; 
-
-    // --- LOGICA LOGIN ---
-    document.getElementById('btnLogin').onclick = () => {
-        signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert("Error: " + e.message));
-    };
-
-    // --- LOGICA REGISTRO ---
-    document.getElementById('btnRegister').onclick = () => {
-        const e = document.getElementById('reg-email').value;
-        const p = document.getElementById('reg-pass').value;
+    <div class="max-w-[1400px] mx-auto space-y-6">
         
-        createUserWithEmailAndPassword(auth, e, p).then(async (res) => {
-            // Creamos documento en 'usuarios'
-            try {
-                await setDoc(doc(db, "usuarios", res.user.uid), { 
-                    email: e, 
-                    plan: 'basico', 
-                    xmlTotal: 0,
-                    uid: res.user.uid, // Guardamos el UID para que el Admin lo pueda usar
-                    fechaRegistro: new Date().toISOString()
-                });
-                alert("Cuenta creada correctamente.");
-            } catch (err) {
-                console.error(err);
-                alert("Error base de datos: " + err.message);
+        <!-- Encabezado -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-3 rounded-xl shadow-inner text-white flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Lector Inteligente CFDI</h1>
+                    <p class="text-sm text-slate-500 mt-1">Extrae y organiza información de tus facturas XML (Ingresos, Egresos, etc.)</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="limpiarTabla()" class="text-sm font-medium text-slate-700 hover:text-red-600 transition-colors px-5 py-2.5 bg-slate-100 hover:bg-red-50 rounded-xl border border-slate-200 hover:border-red-200">
+                    Limpiar Datos
+                </button>
+                <button onclick="exportarCSV()" class="text-sm font-medium text-white transition-colors px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Exportar
+                </button>
+            </div>
+        </header>
+
+        <!-- Zona de Carga (Drag & Drop) -->
+        <div id="dropZone" class="bg-white border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center transition-all duration-200 hover:bg-slate-50 hover:border-blue-400 cursor-pointer shadow-sm relative overflow-hidden group">
+            <input type="file" id="fileInput" multiple accept=".xml" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+            <div class="flex flex-col items-center justify-center space-y-4 relative z-0">
+                <div class="p-4 bg-slate-100 rounded-full group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors text-slate-400">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </div>
+                <div>
+                    <p class="text-lg font-medium text-slate-700">Haz clic o arrastra tus archivos XML aquí</p>
+                    <p class="text-sm text-slate-500 mt-1">Soporta múltiples archivos CFDI (versiones 3.3 y 4.0)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Datos -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase text-xs font-semibold sticky top-0">
+                        <tr>
+                            <th class="px-4 py-4 min-w-[100px]">Fecha</th>
+                            <th class="px-4 py-4 min-w-[80px]">Tipo</th>
+                            <th class="px-4 py-4 min-w-[200px]">Cliente (Receptor)</th>
+                            <th class="px-4 py-4 min-w-[120px]">F. Pago</th>
+                            <th class="px-4 py-4 min-w-[120px]">M. Pago</th>
+                            <th class="px-4 py-4 min-w-[120px] text-right">Subtotal</th>
+                            
+                            <!-- Impuestos trasladados con sus porcentajes AL LADO -->
+                            <th class="px-4 py-4 min-w-[120px] text-right bg-blue-50/50">IVA Traslado</th>
+                            <th class="px-4 py-4 min-w-[80px] text-center bg-blue-50/50">% IVA</th>
+                            
+                            <th class="px-4 py-4 min-w-[120px] text-right bg-purple-50/50">IEPS Traslado</th>
+                            <th class="px-4 py-4 min-w-[80px] text-center bg-purple-50/50">% IEPS</th>
+                            
+                            <th class="px-4 py-4 min-w-[120px] text-right text-rose-700/80">Ret IVA</th>
+                            <th class="px-4 py-4 min-w-[120px] text-right text-rose-700/80">Ret ISR</th>
+                            
+                            <th class="px-4 py-4 min-w-[120px] text-right bg-emerald-50/50">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100">
+                        <!-- Estado vacío -->
+                        <tr id="emptyState">
+                            <td colspan="13" class="px-4 py-16 text-center">
+                                <div class="flex flex-col items-center justify-center text-slate-400">
+                                    <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <p class="text-base font-medium text-slate-500">No hay datos registrados</p>
+                                    <p class="text-sm mt-1">Sube tus archivos XML para generar la tabla</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pie de tabla / Contador -->
+            <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center text-sm text-slate-600">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-3 w-3">
+                      <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-0"></span>
+                      <span id="statusDot" class="relative inline-flex rounded-full h-3 w-3 bg-slate-300"></span>
+                    </span>
+                    <span id="counterText" class="font-medium">0 facturas procesadas</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const counterText = document.getElementById('counterText');
+        const statusPing = document.getElementById('statusPing');
+        const statusDot = document.getElementById('statusDot');
+        
+        let facturasProcesadas = 0;
+
+        // Prevenir comportamientos por defecto del navegador para Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Efectos visuales al arrastrar
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('drag-active');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('drag-active');
+            }, false);
+        });
+
+        // Manejar los archivos soltados o seleccionados
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            // Animación de estado (cargando)
+            statusPing.classList.remove('opacity-0');
+            statusDot.classList.replace('bg-slate-300', 'bg-blue-500');
+
+            Array.from(files).forEach(file => {
+                // Verificar que sea un archivo XML
+                if (file.type === "text/xml" || file.name.toLowerCase().endsWith('.xml')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => procesarXML(e.target.result);
+                    reader.readAsText(file);
+                }
+            });
+
+            // Limpiar input para permitir subir el mismo archivo si es necesario
+            fileInput.value = '';
+            
+            // Detener animación poco después de procesar
+            setTimeout(() => {
+                statusPing.classList.add('opacity-0');
+            }, 1000);
+        }
+
+        function procesarXML(xmlText) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+            // Función auxiliar robusta para buscar nodos sin importar los prefijos de namespaces
+            const getElement = (tagName) => {
+                let el = xmlDoc.getElementsByTagName('cfdi:' + tagName);
+                if (el.length === 0) el = xmlDoc.getElementsByTagName(tagName);
+                return el;
+            };
+
+            const comprobante = getElement('Comprobante')[0];
+            if (!comprobante) {
+                console.warn("No se encontró el nodo Comprobante. Probablemente no es un CFDI.");
+                return; 
             }
-        }).catch(e => alert("Error registro: " + e.message));
-    };
 
-    // --- MONITOR DE SESIÓN ---
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-display').innerText = user.email;
+            const receptor = getElement('Receptor')[0];
+            
+            // Extraer datos generales
+            const data = {
+                fecha: comprobante.getAttribute('Fecha') ? comprobante.getAttribute('Fecha').split('T')[0] : 'N/A',
+                tipo: comprobante.getAttribute('TipoDeComprobante') || 'N/A',
+                cliente: receptor ? (receptor.getAttribute('Nombre') || receptor.getAttribute('Rfc') || 'Público en General') : 'N/A',
+                formaPago: comprobante.getAttribute('FormaPago') || 'N/A',
+                metodoPago: comprobante.getAttribute('MetodoPago') || 'N/A',
+                subTotal: formatMoneda(comprobante.getAttribute('SubTotal')),
+                total: formatMoneda(comprobante.getAttribute('Total')),
+                
+                // Impuestos (inicializados vacíos)
+                ivaTraslado: '-', 
+                ivaTasa: '',
+                iepsTraslado: '-', 
+                iepsTasa: '',
+                retIva: '-', 
+                retIsr: '-'
+            };
 
-            // --- ADMIN ---
-            if(user.email === ADMIN_EMAIL) {
-                document.getElementById('nav-admin').style.display = 'block'; 
-                cargarAdmin(); 
-            } else {
-                document.getElementById('nav-admin').style.display = 'none';
+            // Mapeo de tipos de comprobante para interfaz gráfica
+            const tipoMap = {
+                'I': 'Ingreso',
+                'E': 'Egreso',
+                'P': 'Pago',
+                'N': 'Nómina',
+                'T': 'Traslado'
+            };
+            data.tipoNombre = tipoMap[data.tipo] || data.tipo;
+
+            // Extraer Impuestos Globales
+            const impuestosNodes = getElement('Impuestos');
+            let globalImpuestos = null;
+            
+            // Buscar el nodo Impuestos principal (hijo directo de Comprobante) para evitar impuestos a nivel concepto
+            for(let i=0; i<impuestosNodes.length; i++) {
+                if(impuestosNodes[i].parentNode.nodeName.includes('Comprobante')) {
+                    globalImpuestos = impuestosNodes[i];
+                    break;
+                }
             }
 
-            // --- USUARIO ---
-            onSnapshot(doc(db, "usuarios", user.uid), (snap) => {
-                if(snap.exists()){
-                    const userData = snap.data();
-                    isPremium = userData.plan === 'pro';
-                    document.getElementById('xml-count').innerText = userData.xmlTotal || 0;
-                    document.getElementById('plan-status').innerText = isPremium ? "Premium 💎" : "Básico (Gratis)";
+            if (globalImpuestos) {
+                // Catálogos SAT: 001=ISR, 002=IVA, 003=IEPS
+                
+                // 1. Extraer TRASLADOS (IVA, IEPS)
+                const traslados = globalImpuestos.getElementsByTagName('cfdi:Traslado').length > 0 
+                    ? globalImpuestos.getElementsByTagName('cfdi:Traslado') 
+                    : globalImpuestos.getElementsByTagName('Traslado');
                     
-                    if(isPremium) {
-                        document.getElementById('panel-premium').style.display = 'block';
-                        document.getElementById('btnMejorar').innerText = "Premium Activo";
-                        document.getElementById('btnMejorar').disabled = true;
-                    } else {
-                        document.getElementById('panel-premium').style.display = 'none';
+                for(let i=0; i<traslados.length; i++) {
+                    const t = traslados[i];
+                    const imp = t.getAttribute('Impuesto');
+                    const importe = t.getAttribute('Importe');
+                    const tasa = t.getAttribute('TasaOCuota') || t.getAttribute('Tasa');
+                    
+                    if (imp === '002' || imp === 'IVA') {
+                        data.ivaTraslado = formatMoneda(importe);
+                        if (tasa) data.ivaTasa = `${(parseFloat(tasa)*100).toFixed(0)}%`; // Formato 16%
+                    } else if (imp === '003' || imp === 'IEPS') {
+                        data.iepsTraslado = formatMoneda(importe);
+                        // El IEPS puede tener decimales (ej. 8% o 26.5%)
+                        if (tasa) data.iepsTasa = `${(parseFloat(tasa)*100).toFixed(2).replace(/\.00$/, '')}%`;
                     }
                 }
-            });
 
-        } else {
-            document.getElementById('login-page').style.display = 'flex';
-            document.getElementById('main-app').style.display = 'none';
-        }
-    });
+                // 2. Extraer RETENCIONES (ISR, IVA)
+                const retenciones = globalImpuestos.getElementsByTagName('cfdi:Retencion').length > 0 
+                    ? globalImpuestos.getElementsByTagName('cfdi:Retencion') 
+                    : globalImpuestos.getElementsByTagName('Retencion');
 
-    // --- SUBIDA DE PAGO ---
-    document.getElementById('btnEnviarPago').addEventListener('click', async () => {
-        const file = document.getElementById('pagoCapture').files[0];
-        if(!file) return alert("Selecciona ticket");
-        
-        const btn = document.getElementById('btnEnviarPago');
-        btn.innerText = "Subiendo..."; btn.disabled = true;
-
-        try {
-            // Subir Imagen
-            const path = `tickets/${auth.currentUser.uid}_${Date.now()}`;
-            const url = await getDownloadURL((await uploadBytes(ref(storage, path), file)).ref);
-
-            // Crear registro en 'pagos'
-            // IMPORTANTE: Las nuevas reglas permiten esto ahora
-            await setDoc(doc(db, "pagos", auth.currentUser.uid), {
-                email: auth.currentUser.email,
-                uid: auth.currentUser.uid,
-                foto: url,
-                status: 'pendiente',
-                fecha: new Date().toISOString()
-            });
-
-            alert("Enviado. Espera aprobación.");
-            cerrarModal();
-        } catch(e) { 
-            console.error(e);
-            alert("Error (Revisa tus reglas de Firebase): " + e.message); 
-        } finally { 
-            btn.innerText = "Enviar Comprobante"; btn.disabled = false; 
-        }
-    });
-
-    // --- PANEL ADMIN ---
-    function cargarAdmin() {
-        // Cargar PAGOS
-        onSnapshot(collection(db, "pagos"), (snap) => {
-            const list = document.getElementById('admin-solicitudes');
-            list.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                if(data.status === 'pendiente') {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${data.email}</td>
-                        <td><a href="${data.foto}" target="_blank" style="color:var(--accent); font-weight:bold;">VER TICKET</a></td>
-                        <td><button class="btn btn-gold" onclick="aprobarUsuario('${data.uid}')" style="padding:5px 10px; font-size:0.7rem;">APROBAR</button></td>
-                    `;
-                    list.appendChild(row);
+                for(let i=0; i<retenciones.length; i++) {
+                    const r = retenciones[i];
+                    const imp = r.getAttribute('Impuesto');
+                    const importe = r.getAttribute('Importe');
+                    
+                    if (imp === '001' || imp === 'ISR') {
+                        data.retIsr = formatMoneda(importe);
+                    } else if (imp === '002' || imp === 'IVA') {
+                        data.retIva = formatMoneda(importe);
+                    }
                 }
-            });
-            if(list.innerHTML === "") list.innerHTML = "<tr><td colspan='3'>Sin pagos pendientes</td></tr>";
-        }, (error) => {
-            console.error("Error Admin Pagos:", error);
-            document.getElementById('admin-solicitudes').innerHTML = `<tr><td colspan='3' style='color:red'>Error de permisos: ${error.message}</td></tr>`;
-        });
+            }
 
-        // Cargar USUARIOS
-        onSnapshot(collection(db, "usuarios"), (snap) => {
-            const list = document.getElementById('admin-clientes-lista');
-            list.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                const isPro = data.plan === 'pro';
-                list.innerHTML += `
-                    <tr>
-                        <td>${data.email}</td>
-                        <td><span class="badge-status" style="background:${isPro?'#fefce8':'#f1f5f9'}; color:${isPro?'#ca8a04':'#64748b'}">${data.plan.toUpperCase()}</span></td>
-                        <td>${data.xmlTotal || 0}</td>
-                    </tr>
-                `;
-            });
-        }, (error) => {
-            console.error("Error Admin Usuarios:", error);
-            document.getElementById('admin-clientes-lista').innerHTML = `<tr><td colspan='3' style='color:red'>Error de permisos: ${error.message}</td></tr>`;
-        });
-    }
+            agregarFilaTabla(data);
+        }
 
-    // APROBACIÓN GLOBAL
-    window.aprobarUsuario = async (uid) => {
-        try {
-            await updateDoc(doc(db, "usuarios", uid), { plan: 'pro' });
-            await updateDoc(doc(db, "pagos", uid), { status: 'aprobado' });
-            alert("Usuario aprobado.");
-        } catch (e) { alert("Error: " + e.message); }
-    };
+        function agregarFilaTabla(data) {
+            // Ocultar estado vacío en la primera inserción
+            if (facturasProcesadas === 0) {
+                emptyState.style.display = 'none';
+            }
 
-    // --- XML UTILS ---
-    document.getElementById('fileInput').onchange = async (e) => {
-        const files = e.target.files;
-        const b = document.getElementById('tableBody');
-        b.innerHTML = "";
-        let sIva=0, sIeps=0, sTot=0;
+            const row = document.createElement('tr');
+            row.className = "hover:bg-slate-50 transition-colors group";
+            
+            // Helpers de renderizado para UI más limpia
+            const renderMonto = (monto) => monto === '-' 
+                ? '<span class="text-slate-300">-</span>' 
+                : `<span class="font-medium text-slate-700">${monto}</span>`;
+            
+            const renderBadge = (valor, colorClass) => valor 
+                ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${colorClass}">${valor}</span>` 
+                : '<span class="text-slate-300">-</span>';
 
-        for (let f of files) {
-            const xml = new DOMParser().parseFromString(await f.text(), "text/xml");
-            const rfc = xml.getElementsByTagNameNS("*", "Emisor")[0]?.getAttribute('Rfc') || "N/A";
-            const conc = xml.getElementsByTagNameNS("*", "Concepto");
+            // Determinar color del tipo de comprobante
+            let tipoClase = 'bg-slate-100 text-slate-700';
+            if (data.tipo === 'I') tipoClase = 'bg-emerald-100 text-emerald-800';
+            if (data.tipo === 'E') tipoClase = 'bg-rose-100 text-rose-800';
 
-            Array.from(conc).forEach(c => {
-                let sub = parseFloat(c.getAttribute('Importe')||0), iva=0, ieps=0;
-                Array.from(c.getElementsByTagNameNS("*", "Traslado")).forEach(tr => {
-                    const imp = parseFloat(tr.getAttribute('Importe')||0);
-                    if(tr.getAttribute('Impuesto')==="002") iva=imp;
-                    if(tr.getAttribute('Impuesto')==="003") ieps=imp;
+            row.innerHTML = `
+                <td class="px-4 py-3 text-slate-600">${data.fecha}</td>
+                <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${tipoClase}">
+                        ${data.tipoNombre}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-slate-800 font-medium truncate max-w-[250px]" title="${data.cliente}">
+                    ${data.cliente}
+                </td>
+                <td class="px-4 py-3 text-slate-600">${data.formaPago}</td>
+                <td class="px-4 py-3 text-slate-600">${data.metodoPago}</td>
+                <td class="px-4 py-3 text-right font-medium text-slate-700">${data.subTotal}</td>
+                
+                <!-- IVA (Monto e Insignia) -->
+                <td class="px-4 py-3 text-right bg-blue-50/30 group-hover:bg-blue-50/60">${renderMonto(data.ivaTraslado)}</td>
+                <td class="px-4 py-3 text-center bg-blue-50/30 group-hover:bg-blue-50/60">${renderBadge(data.ivaTasa, 'bg-blue-100 text-blue-700')}</td>
+                
+                <!-- IEPS (Monto e Insignia) -->
+                <td class="px-4 py-3 text-right bg-purple-50/30 group-hover:bg-purple-50/60">${renderMonto(data.iepsTraslado)}</td>
+                <td class="px-4 py-3 text-center bg-purple-50/30 group-hover:bg-purple-50/60">${renderBadge(data.iepsTasa, 'bg-purple-100 text-purple-700')}</td>
+                
+                <!-- Retenciones -->
+                <td class="px-4 py-3 text-right text-rose-600">${renderMonto(data.retIva)}</td>
+                <td class="px-4 py-3 text-right text-rose-600">${renderMonto(data.retIsr)}</td>
+                
+                <!-- Total -->
+                <td class="px-4 py-3 text-right font-bold text-slate-900 bg-emerald-50/30">${data.total}</td>
+            `;
+
+            tableBody.appendChild(row);
+            
+            // Actualizar contadores
+            facturasProcesadas++;
+            counterText.innerText = `${facturasProcesadas} factura${facturasProcesadas > 1 ? 's' : ''} procesada${facturasProcesadas > 1 ? 's' : ''}`;
+        }
+
+        function formatMoneda(valor) {
+            if (!valor || isNaN(valor)) return '$0.00';
+            const num = parseFloat(valor);
+            return new Intl.NumberFormat('es-MX', { 
+                style: 'currency', 
+                currency: 'MXN' 
+            }).format(num);
+        }
+
+        function limpiarTabla() {
+            tableBody.innerHTML = '';
+            tableBody.appendChild(emptyState);
+            emptyState.style.display = 'table-row';
+            facturasProcesadas = 0;
+            counterText.innerText = '0 facturas procesadas';
+            statusDot.classList.replace('bg-blue-500', 'bg-slate-300');
+        }
+
+        function exportarCSV() {
+            if (facturasProcesadas === 0) return;
+            
+            // Cabeceras exactas a las columnas
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // \uFEFF fuerza UTF-8 en Excel
+            csvContent += "Fecha,Tipo,Cliente,Forma de Pago,Metodo de Pago,Subtotal,IVA Traslado,% IVA,IEPS Traslado,% IEPS,Retencion IVA,Retencion ISR,Total\n";
+            
+            const rows = tableBody.querySelectorAll('tr:not(#emptyState)');
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                const rowData = Array.from(cols).map(col => {
+                    // Limpiar saltos de linea y quitar comas para no romper el CSV
+                    let text = col.innerText.replace(/\n/g, ' ').replace(/,/g, '').trim();
+                    // Si está vacío (el guion), poner vacio
+                    if(text === '-') text = '';
+                    return `"${text}"`; // Envolver en comillas por seguridad
                 });
-                sIva+=iva; sIeps+=ieps; sTot+=(sub+iva+ieps);
-                b.innerHTML += `<tr><td>${rfc}</td><td>${c.getAttribute('Descripcion').slice(0,30)}</td><td>$${sub.toFixed(2)}</td><td><span class="badge badge-iva">$${iva.toFixed(2)}</span></td><td><span class="badge badge-ieps">$${ieps.toFixed(2)}</span></td><td><strong>$${(sub+iva+ieps).toFixed(2)}</strong></td></tr>`;
+                csvContent += rowData.join(",") + "\n";
             });
-        }
-        if(isPremium) {
-            document.getElementById('sum-iva').innerText="$"+sIva.toFixed(2);
-            document.getElementById('sum-ieps').innerText="$"+sIeps.toFixed(2);
-            document.getElementById('sum-total').innerText="$"+sTot.toFixed(2);
-        }
-        await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { xmlTotal: increment(files.length) });
-    };
 
-    window.showSection = (id) => {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
-        document.getElementById(id).classList.add('active-section');
-    };
-    window.toggleAuth = (r) => {
-        document.getElementById('card-login').style.display = r ? 'none' : 'block';
-        document.getElementById('card-register').style.display = r ? 'block' : 'none';
-    };
-    window.abrirModal = () => document.getElementById('modalPago').style.display = 'flex';
-    window.cerrarModal = () => document.getElementById('modalPago').style.display = 'none';
-    window.handleLogout = () => signOut(auth);
-</script>
+            // Trigger descarga
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "reporte_cfdi_contable.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
